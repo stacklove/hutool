@@ -601,7 +601,7 @@ public class IoUtil {
 			throw new IORuntimeException(e);
 		}
 		if (readLength > 0 && readLength < length) {
-			byte[] b2 = new byte[length];
+			byte[] b2 = new byte[readLength];
 			System.arraycopy(b, 0, b2, 0, readLength);
 			return b2;
 		} else {
@@ -1240,5 +1240,18 @@ public class IoUtil {
 			IoUtil.close(in);
 		}
 		return checksum;
+	}
+
+	/**
+	 * 计算流的校验码，计算后关闭流
+	 *
+	 * @param in       流
+	 * @param checksum {@link Checksum}
+	 * @return Checksum
+	 * @throws IORuntimeException IO异常
+	 * @since 5.4.0
+	 */
+	public static long checksumValue(InputStream in, Checksum checksum){
+		return checksum(in, checksum).getValue();
 	}
 }

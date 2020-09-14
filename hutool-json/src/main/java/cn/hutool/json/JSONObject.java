@@ -1,8 +1,9 @@
 package cn.hutool.json;
 
-import cn.hutool.core.bean.BeanDesc.PropDesc;
 import cn.hutool.core.bean.BeanPath;
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.bean.copier.BeanCopier;
+import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.map.CaseInsensitiveLinkedMap;
@@ -19,7 +20,6 @@ import cn.hutool.json.serialize.JSONSerializer;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Collection;
@@ -282,7 +282,7 @@ public class JSONObject implements JSON, JSONGetter<String>, Map<String, Object>
 		if (CollectionUtil.isEmpty(names)) {
 			return null;
 		}
-		final JSONArray ja = new JSONArray();
+		final JSONArray ja = new JSONArray(this.config);
 		Object value;
 		for (String name : names) {
 			value = this.get(name);
@@ -432,11 +432,11 @@ public class JSONObject implements JSON, JSONGetter<String>, Map<String, Object>
 		InternalJSONUtil.testValidity(value);
 		Object object = this.getObj(key);
 		if (object == null) {
-			this.put(key, value instanceof JSONArray ? new JSONArray().set(value) : value);
+			this.put(key, value instanceof JSONArray ? new JSONArray(this.config).set(value) : value);
 		} else if (object instanceof JSONArray) {
 			((JSONArray) object).set(value);
 		} else {
-			this.set(key, new JSONArray().set(object).set(value));
+			this.set(key, new JSONArray(this.config).set(object).set(value));
 		}
 		return this;
 	}
@@ -453,7 +453,7 @@ public class JSONObject implements JSON, JSONGetter<String>, Map<String, Object>
 		InternalJSONUtil.testValidity(value);
 		Object object = this.getObj(key);
 		if (object == null) {
-			this.set(key, new JSONArray().set(value));
+			this.set(key, new JSONArray(this.config).set(value));
 		} else if (object instanceof JSONArray) {
 			this.set(key, ((JSONArray) object).set(value));
 		} else {
@@ -620,36 +620,12 @@ public class JSONObject implements JSON, JSONGetter<String>, Map<String, Object>
 	 * @param bean Bean对象
 	 */
 	private void populateMap(Object bean) {
-		final Collection<PropDesc> props = BeanUtil.getBeanDesc(bean.getClass()).getProps();
-
-		Method getter;
-		Object value;
-		for (PropDesc prop : props) {
-			// 得到property对应的getter方法
-			getter = prop.getGetter();
-			if (null == getter) {
-				// 无Getter跳过
-				continue;
-			}
-
-			// 只读取有getter方法的属性
-			try {
-				value = getter.invoke(bean);
-			} catch (Exception ignore) {
-				// 忽略读取失败的属性
-				continue;
-			}
-
-			if (ObjectUtil.isNull(value) && this.config.isIgnoreNullValue()) {
-				// 值为null且用户定义跳过则跳过
-				continue;
-			}
-
-			if (value != bean) {
-				// 防止循环引用
-				this.put(prop.getFieldName(), value);
-			}
-		}
+		BeanCopier.create(bean, this,
+				CopyOptions.create()
+						.setIgnoreCase(config.isIgnoreCase())
+						.setIgnoreError(true)
+						.setIgnoreNullValue(config.isIgnoreNullValue())
+		).copy();
 	}
 
 	/**

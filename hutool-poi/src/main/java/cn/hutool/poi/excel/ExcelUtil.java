@@ -17,7 +17,7 @@ import java.io.File;
 import java.io.InputStream;
 
 /**
- * Excel工具类
+ * Excel工具类,不建议直接使用index直接操作sheet，在wps/excel中sheet显示顺序与index无关，还有隐藏sheet
  * 
  * @author Looly
  *
@@ -289,7 +289,7 @@ public class ExcelUtil {
 	 */
 	public static ExcelReader getReader(InputStream bookStream, int sheetIndex) {
 		try {
-			return new ExcelReader(bookStream, sheetIndex, true);
+			return new ExcelReader(bookStream, sheetIndex);
 		} catch (NoClassDefFoundError e) {
 			throw new DependencyException(ObjectUtil.defaultIfNull(e.getCause(), e), PoiChecker.NO_POI_ERROR_MSG);
 		}
@@ -303,10 +303,12 @@ public class ExcelUtil {
 	 * @param closeAfterRead 读取结束是否关闭流
 	 * @return {@link ExcelReader}
 	 * @since 4.0.3
+	 * @deprecated 使用完毕无论是否closeAfterRead，poi会关闭流，此参数无意义。
 	 */
+	@Deprecated
 	public static ExcelReader getReader(InputStream bookStream, int sheetIndex, boolean closeAfterRead) {
 		try {
-			return new ExcelReader(bookStream, sheetIndex, closeAfterRead);
+			return new ExcelReader(bookStream, sheetIndex);
 		} catch (NoClassDefFoundError e) {
 			throw new DependencyException(ObjectUtil.defaultIfNull(e.getCause(), e), PoiChecker.NO_POI_ERROR_MSG);
 		}
@@ -322,7 +324,7 @@ public class ExcelUtil {
 	 */
 	public static ExcelReader getReader(InputStream bookStream, String sheetName) {
 		try {
-			return new ExcelReader(bookStream, sheetName, true);
+			return new ExcelReader(bookStream, sheetName);
 		} catch (NoClassDefFoundError e) {
 			throw new DependencyException(ObjectUtil.defaultIfNull(e.getCause(), e), PoiChecker.NO_POI_ERROR_MSG);
 		}
@@ -335,10 +337,12 @@ public class ExcelUtil {
 	 * @param sheetName sheet名，第一个默认是sheet1
 	 * @param closeAfterRead 读取结束是否关闭流
 	 * @return {@link ExcelReader}
+	 * @deprecated 使用完毕无论是否closeAfterRead，poi会关闭流，此参数无意义。
 	 */
+	@Deprecated
 	public static ExcelReader getReader(InputStream bookStream, String sheetName, boolean closeAfterRead) {
 		try {
-			return new ExcelReader(bookStream, sheetName, closeAfterRead);
+			return new ExcelReader(bookStream, sheetName);
 		} catch (NoClassDefFoundError e) {
 			throw new DependencyException(ObjectUtil.defaultIfNull(e.getCause(), e), PoiChecker.NO_POI_ERROR_MSG);
 		}

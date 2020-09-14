@@ -1693,13 +1693,32 @@ public class NumberUtil {
 	 * 此方法通过调用{@link BigDecimal#compareTo(BigDecimal)}方法来判断是否相等<br>
 	 * 此方法判断值相等时忽略精度的，即0.00 == 0
 	 *
+	 * @param num1 数字1
+	 * @param num2 数字2
+	 * @return 是否相等
+	 * @since 5.4.2
+	 */
+	public static boolean equals(double num1, double num2) {
+		return equals(toBigDecimal(num1), toBigDecimal(num2));
+	}
+
+	/**
+	 * 比较大小，值相等 返回true<br>
+	 * 此方法通过调用{@link BigDecimal#compareTo(BigDecimal)}方法来判断是否相等<br>
+	 * 此方法判断值相等时忽略精度的，即0.00 == 0
+	 *
 	 * @param bigNum1 数字1
 	 * @param bigNum2 数字2
 	 * @return 是否相等
 	 */
 	public static boolean equals(BigDecimal bigNum1, BigDecimal bigNum2) {
-		Assert.notNull(bigNum1);
-		Assert.notNull(bigNum2);
+		//noinspection NumberEquality
+		if (bigNum1 == bigNum2){
+			return true;
+		}
+		if (bigNum1==null || bigNum2==null){
+			return false;
+		}
 		return 0 == bigNum1.compareTo(bigNum2);
 	}
 
@@ -2114,7 +2133,7 @@ public class NumberUtil {
 	 */
 	public static int partValue(int total, int partCount, boolean isPlusOneWhenHasRem) {
 		int partValue = total / partCount;
-		if (isPlusOneWhenHasRem && total % partCount == 0) {
+		if (isPlusOneWhenHasRem && total % partCount > 0) {
 			partValue++;
 		}
 		return partValue;

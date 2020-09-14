@@ -41,7 +41,7 @@ public abstract class AbstractDb implements Serializable {
 	/**
 	 * 是否大小写不敏感（默认大小写不敏感）
 	 */
-	protected boolean caseInsensitive = DbUtil.caseInsensitiveGlobal;
+	protected boolean caseInsensitive = GlobalDbConfig.caseInsensitive;
 	protected SqlConnRunner runner;
 
 	// ------------------------------------------------------- Constructor start
@@ -251,12 +251,49 @@ public abstract class AbstractDb implements Serializable {
 	/**
 	 * 批量执行非查询语句
 	 *
+	 * @param sql         SQL
+	 * @param paramsBatch 批量的参数
+	 * @return 每个SQL执行影响的行数
+	 * @throws SQLException SQL执行异常
+	 * @since 5.4.2
+	 */
+	public int[] executeBatch(String sql, Iterable<Object[]> paramsBatch) throws SQLException {
+		Connection conn = null;
+		try {
+			conn = this.getConnection();
+			return SqlExecutor.executeBatch(conn, sql, paramsBatch);
+		} finally {
+			this.closeConnection(conn);
+		}
+	}
+
+	/**
+	 * 批量执行非查询语句
+	 *
 	 * @param sqls SQL列表
 	 * @return 每个SQL执行影响的行数
 	 * @throws SQLException SQL执行异常
 	 * @since 4.5.6
 	 */
 	public int[] executeBatch(String... sqls) throws SQLException {
+		Connection conn = null;
+		try {
+			conn = this.getConnection();
+			return SqlExecutor.executeBatch(conn, sqls);
+		} finally {
+			this.closeConnection(conn);
+		}
+	}
+
+	/**
+	 * 批量执行非查询语句
+	 *
+	 * @param sqls SQL列表
+	 * @return 每个SQL执行影响的行数
+	 * @throws SQLException SQL执行异常
+	 * @since 5.4.2
+	 */
+	public int[] executeBatch(Iterable<String> sqls) throws SQLException {
 		Connection conn = null;
 		try {
 			conn = this.getConnection();
